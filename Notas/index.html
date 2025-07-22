@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Calculadora de Notas</title>
+  <style>
+    body { font-family: Arial, sans-serif; background: #8a0638; margin: 0; padding: 0; }
+    .container { max-width: 500px; margin: 40px auto; background: #fff; padding: 30px 40px; border-radius: 10px; box-shadow: 0 2px 8px #0001; }
+    h1 { text-align: center; }
+    .tabs { display: flex; margin-bottom: 20px; }
+    .tab { flex: 1; padding: 10px; text-align: center; cursor: pointer; background: #eee; border-radius: 8px 8px 0 0; margin-right: 2px; }
+    .tab.active { background: #8a0638; color: #fff; }
+    .form-section { display: none; }
+    .form-section.active { display: block; }
+    label { display: block; margin-top: 15px; }
+    input[type="number"] { width: 100%; padding: 8px; margin-top: 5px; border-radius: 4px; border: 1px solid #ccc; }
+    button { margin-top: 20px; width: 100%; padding: 12px; background: #8a0638; color: #fff; border: none; border-radius: 6px; font-size: 16px; cursor: pointer; }
+    .result { margin-top: 20px; padding: 15px; background: #f5d1e3; border-radius: 6px; font-size: 16px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Calculadora de Notas</h1>
+    <div class="tabs">
+      <div class="tab active" id="tab-atp">Com ATP</div>
+      <div class="tab" id="tab-sem-atp">Sem ATP</div>
+    </div>
+    <div class="form-section active" id="section-atp">
+      <label for="a1">Nota A1 (0 a 10):</label>
+      <input type="number" id="a1" min="0" max="10" step="0.01">
+      <label for="a2">Nota A2 (0 a 10):</label>
+      <input type="number" id="a2" min="0" max="10" step="0.01">
+      <label for="atp">Nota ATP (0 a 10):</label>
+      <input type="number" id="atp" min="0" max="10" step="0.01">
+      <button onclick="calcularComATP()">Calcular</button>
+      <div class="result" id="resultado-atp"></div>
+    </div>
+    <div class="form-section" id="section-sem-atp">
+      <label for="s1">Nota S1 (0 a 10):</label>
+      <input type="number" id="s1" min="0" max="10" step="0.01">
+      <label for="s2">Nota S2 (0 a 10):</label>
+      <input type="number" id="s2" min="0" max="10" step="0.01">
+      <button onclick="calcularSemATP()">Calcular</button>
+      <div class="result" id="resultado-sem-atp"></div>
+    </div>
+  </div>
+  <script>
+    // Tab switching
+    const tabATP = document.getElementById('tab-atp');
+    const tabSemATP = document.getElementById('tab-sem-atp');
+    const sectionATP = document.getElementById('section-atp');
+    const sectionSemATP = document.getElementById('section-sem-atp');
+    tabATP.onclick = () => {
+      tabATP.classList.add('active');
+      tabSemATP.classList.remove('active');
+      sectionATP.classList.add('active');
+      sectionSemATP.classList.remove('active');
+    };
+    tabSemATP.onclick = () => {
+      tabSemATP.classList.add('active');
+      tabATP.classList.remove('active');
+      sectionSemATP.classList.add('active');
+      sectionATP.classList.remove('active');
+    };
+
+    function calcularComATP() {
+      const a1 = parseFloat(document.getElementById('a1').value) || 0;
+      const a2 = parseFloat(document.getElementById('a2').value) || 0;
+      const atp = parseFloat(document.getElementById('atp').value) || 0;
+      // Pesos
+      const pesoA1 = 0.10;
+      const pesoA2 = 0.10;
+      const pesoATP = 0.40;
+      const pesoProva = 0.40;
+      const notaMinima = 7.0;
+      // Nota acumulada
+      const notaAtual = a1 * pesoA1 + a2 * pesoA2 + atp * pesoATP;
+      // Nota necessária na prova
+      const notaRestante = notaMinima - notaAtual;
+      let mensagem = `<b>Nota parcial acumulada:</b> ${notaAtual.toFixed(2)} / 7.00<br>`;
+      if (notaRestante <= 0) {
+        mensagem += 'Parabéns! Você já atingiu a nota mínima para aprovação.';
+      } else {
+        mensagem += `<b>Faltam:</b> ${notaRestante.toFixed(2)} pontos para 7.00<br>`;
+        // Nota necessária na prova (0 a 10)
+        const notaProvaNecessaria = notaRestante / pesoProva;
+        if (notaProvaNecessaria > 10) {
+          mensagem += 'Infelizmente, não é possível atingir a nota mínima mesmo acertando todas as questões da prova.';
+        } else {
+          // Prova tem 10 questões, cada uma vale 1 ponto
+          const questoesNecessarias = Math.ceil(notaProvaNecessaria);
+          mensagem += `Você precisa tirar pelo menos <b>${notaProvaNecessaria.toFixed(2)}</b> na prova final.<br>Isso equivale a acertar pelo menos <b>${questoesNecessarias}</b> de 10 questões.`;
+        }
+      }
+      document.getElementById('resultado-atp').innerHTML = mensagem;
+    }
+
+    function calcularSemATP() {
+      const s1 = parseFloat(document.getElementById('s1').value) || 0;
+      const s2 = parseFloat(document.getElementById('s2').value) || 0;
+      // Pesos
+      const pesoS1 = 0.30;
+      const pesoS2 = 0.30;
+      const pesoProva = 0.40;
+      const notaMinima = 7.0;
+      // Nota acumulada
+      const notaAtual = s1 * pesoS1 + s2 * pesoS2;
+      // Nota necessária na prova
+      const notaRestante = notaMinima - notaAtual;
+      let mensagem = `<b>Nota parcial acumulada:</b> ${notaAtual.toFixed(2)} / 7.00<br>`;
+      if (notaRestante <= 0) {
+        mensagem += 'Parabéns! Você já atingiu a nota mínima para aprovação.';
+      } else {
+        mensagem += `<b>Faltam:</b> ${notaRestante.toFixed(2)} pontos para 7.00<br>`;
+        // Nota necessária na prova (0 a 10)
+        const notaProvaNecessaria = notaRestante / pesoProva;
+        if (notaProvaNecessaria > 10) {
+          mensagem += 'Infelizmente, não é possível atingir a nota mínima mesmo acertando todas as questões da prova.';
+        } else {
+          // Prova tem 10 questões, cada uma vale 1 ponto
+          const questoesNecessarias = Math.ceil(notaProvaNecessaria);
+          mensagem += `Você precisa tirar pelo menos <b>${notaProvaNecessaria.toFixed(2)}</b> na prova final.<br>Isso equivale a acertar pelo menos <b>${questoesNecessarias}</b> de 10 questões.`;
+        }
+      }
+      document.getElementById('resultado-sem-atp').innerHTML = mensagem;
+    }
+
+    // Permitir cálculo ao pressionar Enter nos campos de nota
+    document.getElementById('a1').addEventListener('keydown', function(e) { if (e.key === 'Enter') calcularComATP(); });
+    document.getElementById('a2').addEventListener('keydown', function(e) { if (e.key === 'Enter') calcularComATP(); });
+    document.getElementById('atp').addEventListener('keydown', function(e) { if (e.key === 'Enter') calcularComATP(); });
+    document.getElementById('s1').addEventListener('keydown', function(e) { if (e.key === 'Enter') calcularSemATP(); });
+    document.getElementById('s2').addEventListener('keydown', function(e) { if (e.key === 'Enter') calcularSemATP(); });
+  </script>
+</body>
+</html> 
